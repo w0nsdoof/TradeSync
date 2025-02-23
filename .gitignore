@@ -10,3 +10,4 @@ __pycache__/
 static/
 *.sqlite3
 *.env
+media/
