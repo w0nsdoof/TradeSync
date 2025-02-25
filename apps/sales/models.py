@@ -15,7 +15,7 @@ class SalesOrder(models.Model):
         (COMPLETED, "Completed"),
     ]
 
-    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sales_orders")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sales_orders")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="sales_orders")
     quantity = models.PositiveIntegerField()
     total_price = models.DecimalField(max_digits=12, decimal_places=2)

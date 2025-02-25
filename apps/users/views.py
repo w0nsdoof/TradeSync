@@ -1,5 +1,5 @@
-from rest_framework import generics
-from rest_framework.views import APIView
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -11,30 +11,47 @@ from .permissions import IsAdmin, IsTrader
 
 User = get_user_model()
 
-
-class RegisterView(generics.CreateAPIView):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = RegisterSerializer
-    permission_classes = [AllowAny]
+    serializer_class = UserSerializer
 
-class LogoutView(generics.GenericAPIView):
-    def post(self, request):
+    def get_permissions(self):
+        """Set permissions dynamically based on the action."""
+        if self.action in ["create", "register"]:
+            return [AllowAny()]  
+        elif self.action in ["update_profile", "partial_update", "retrieve"]:
+            return [IsAuthenticated()]  
+        elif self.action == "list":
+            return [IsAdmin()]  
+        return super().get_permissions()
+
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    def register(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
+    def logout(self, request):
         try:
-            refresh_token = request.data["refresh"]
+            refresh_token = request.data.get("refresh")
+            if not refresh_token:
+                return Response({"error": "Refresh token required"}, status=status.HTTP_400_BAD_REQUEST)
+            
             token = RefreshToken(refresh_token)
             token.blacklist()
-            return Response({"message": "Logged out successfully"}, status=200)
-        except Exception as e: # TODO: log error
-            return Response({"error": "Invalid token"}, status=400)
+            return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:  # TODO: log error
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
-class AdminOnlyView(APIView):
-    permission_classes = [IsAuthenticated, IsAdmin]
+    @action(detail=False, methods=["patch"], permission_classes=[IsAuthenticated])
+    def update_profile(self, request):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
 
-    def get(self, request):
-        return Response({"message": "Hello, Admin!"})
-
-class TraderOnlyView(APIView):
-    permission_classes = [IsAuthenticated, IsTrader]
-
-    def get(self, request):
-        return Response({"message": "Hello, Trader!"})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Profile updated successfully", "user": serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
