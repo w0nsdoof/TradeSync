@@ -3,15 +3,16 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.db import transaction
 
-from apps.users.permissions import isOwner
+from apps.users.permissions import IsOwner
 from apps.users.models import User
 
 from .models import Order, Transaction
 from .serializers import OrderSerializer, TransactionSerializer
 
 class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated, isOwner]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)

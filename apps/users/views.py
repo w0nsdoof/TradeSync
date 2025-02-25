@@ -3,8 +3,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 
 from .serializers import RegisterSerializer, UserSerializer
 from .permissions import IsAdmin, IsTrader
@@ -17,7 +18,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Set permissions dynamically based on the action."""
-        if self.action in ["create", "register"]:
+        if self.action in ["create", "register", "login"]:
             return [AllowAny()]  
         elif self.action in ["update_profile", "partial_update", "retrieve"]:
             return [IsAuthenticated()]  
@@ -32,6 +33,32 @@ class UserViewSet(viewsets.ModelViewSet):
             user = serializer.save()
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    def login(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response(
+                {"error": "Please provide both username and password"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(username=username, password=password)
+
+        if user:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": UserSerializer(user).data
+            }, status=status.HTTP_200_OK)
+        
+        return Response(
+            {"error": "Invalid credentials"}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
     @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
     def logout(self, request):

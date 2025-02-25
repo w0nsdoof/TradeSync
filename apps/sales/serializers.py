@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import SalesOrder, Invoice, Discount
 
 class SalesOrderSerializer(serializers.ModelSerializer):
-    customer = serializers.ReadOnlyField(source='user.username')
+    user = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = SalesOrder

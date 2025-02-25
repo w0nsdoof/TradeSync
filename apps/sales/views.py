@@ -8,11 +8,11 @@ from django.http import FileResponse
 
 from .models import SalesOrder, Invoice, Discount
 from .serializers import SalesOrderSerializer, InvoiceSerializer, DiscountSerializer
-from apps.users.permissions import IsOwner, IsAdmin
+from apps.users.permissions import IsAdmin, IsOwner
 
 class SalesOrderViewSet(viewsets.ModelViewSet):
     serializer_class = SalesOrderSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_queryset(self):
         if IsAdmin().has_permission(self.request, self):
