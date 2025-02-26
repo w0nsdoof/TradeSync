@@ -9,6 +9,7 @@ from django.db import models
 from django.conf import settings
 
 from apps.products.models import Product
+from celery import shared_task
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +37,7 @@ class SalesOrder(models.Model):
         super().save(*args, **kwargs)
         if self.status == self.COMPLETED and not hasattr(self, "invoice"):
             logger.info(f"Creating invoice for completed sales order {self.id}")
-            invoice = Invoice.objects.create(sales_order=self)
-            invoice.generate_invoice_pdf()
+            generate_invoice.delay(self.id)
     
     def __str__(self):
         return f"Sales Order {self.id} - {self.user}"
@@ -82,3 +82,9 @@ class Discount(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.percentage}% ({'Active' if self.is_active else 'Expired'})"
+
+@shared_task
+def generate_invoice(sales_order_id):
+    sales_order = SalesOrder.objects.get(id=sales_order_id)
+    invoice = Invoice.objects.create(sales_order=sales_order)
+    invoice.generate_invoice_pdf()
