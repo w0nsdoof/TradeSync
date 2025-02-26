@@ -10,6 +10,10 @@ from django.contrib.auth import get_user_model, authenticate
 from .serializers import RegisterSerializer, UserSerializer
 from .permissions import IsAdmin, IsTrader
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 User = get_user_model()
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -70,7 +74,8 @@ class UserViewSet(viewsets.ModelViewSet):
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        except Exception as e:  # TODO: log error
+        except Exception as e:
+            logger.error(f"Error during logout: {e}")
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=["patch"], permission_classes=[IsAuthenticated])

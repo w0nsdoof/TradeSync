@@ -1,3 +1,4 @@
+import logging
 from io import BytesIO
 import pdfkit
 
@@ -8,6 +9,8 @@ from django.db import models
 from django.conf import settings
 
 from apps.products.models import Product
+
+logger = logging.getLogger(__name__)
 
 class SalesOrder(models.Model):
     PENDING = "pending"
@@ -32,6 +35,7 @@ class SalesOrder(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.status == self.COMPLETED and not hasattr(self, "invoice"):
+            logger.info(f"Creating invoice for completed sales order {self.id}")
             invoice = Invoice.objects.create(sales_order=self)
             invoice.generate_invoice_pdf()
     
@@ -56,8 +60,10 @@ class Invoice(models.Model):
             filename = f"invoice_{self.sales_order.id}.pdf"
             pdf_content_file = ContentFile(pdf_file, name=filename)
 
+            logger.info(f"PDF generated successfully for invoice {self.sales_order.id}")
             return pdf_content_file
         except Exception as e:
+            logger.error(f"Error generating PDF for invoice {self.sales_order.id}: {e}")
             print(f"Error generating PDF: {e}") 
 
     def __str__(self):

@@ -10,6 +10,10 @@ from .models import SalesOrder, Invoice, Discount
 from .serializers import SalesOrderSerializer, InvoiceSerializer, DiscountSerializer
 from apps.users.permissions import IsAdmin, IsOwner
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class SalesOrderViewSet(viewsets.ModelViewSet):
     serializer_class = SalesOrderSerializer
     permission_classes = [IsAuthenticated, IsOwner]
@@ -39,7 +43,9 @@ class InvoiceViewSet(viewsets.ReadOnlyModelViewSet):
         invoice = self.get_object()
         pdf_file = invoice.pdf_file
         if pdf_file:
+            logger.info(f"User {request.user} downloading invoice PDF for sales order ID {invoice.sales_order.id}.")
             return FileResponse(pdf_file.open(), as_attachment=True, filename=f"invoice_{invoice.sales_order.id}.pdf")
+        logger.error(f"Failed to generate PDF for invoice ID {invoice.id}.")
         return Response({"error": "Failed to generate PDF"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DiscountViewSet(viewsets.ModelViewSet):
