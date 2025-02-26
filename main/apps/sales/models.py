@@ -1,5 +1,4 @@
 import logging
-from io import BytesIO
 import pdfkit
 
 from django.template.loader import render_to_string
@@ -37,7 +36,7 @@ class SalesOrder(models.Model):
         super().save(*args, **kwargs)
         if self.status == self.COMPLETED and not hasattr(self, "invoice"):
             logger.info(f"Creating invoice for completed sales order {self.id}")
-            generate_invoice.delay(self.id)
+            invoice = Invoice.objects.create(sales_order=self)
     
     def __str__(self):
         return f"Sales Order {self.id} - {self.user}"
@@ -64,7 +63,7 @@ class Invoice(models.Model):
             return pdf_content_file
         except Exception as e:
             logger.error(f"Error generating PDF for invoice {self.sales_order.id}: {e}")
-            print(f"Error generating PDF: {e}") 
+            raise RuntimeError(f"Error generating PDF: {e}")
 
     def __str__(self):
         return f"Invoice for Order {self.sales_order.id}"
@@ -82,9 +81,3 @@ class Discount(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.percentage}% ({'Active' if self.is_active else 'Expired'})"
-
-@shared_task
-def generate_invoice(sales_order_id):
-    sales_order = SalesOrder.objects.get(id=sales_order_id)
-    invoice = Invoice.objects.create(sales_order=sales_order)
-    invoice.generate_invoice_pdf()

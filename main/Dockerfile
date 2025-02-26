@@ -8,8 +8,17 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
-# Install PostgreSQL development dependencies first
-RUN apt-get update && apt-get install -y libpq-dev build-essential
+# Install system dependencies (including wkhtmltopdf)
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    build-essential \
+    xvfb \
+    libfontconfig1 \
+    libxrender1 \
+    wkhtmltopdf
+
+# Set the wkhtmltopdf path in an environment variable
+ENV WKHTMLTOPDF_PATH=/usr/bin/wkhtmltopdf
 
 # Install Python dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \

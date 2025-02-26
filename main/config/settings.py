@@ -92,7 +92,7 @@ DATABASES = {
     }
 }
 
-WKHTMLTOPDF_PATH = "C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe"
+WKHTMLTOPDF_PATH = os.getenv("WKHTMLTOPDF_PATH", "/usr/bin/wkhtmltopdf")
 
 # Rest Framework
 REST_FRAMEWORK = {
@@ -160,6 +160,15 @@ CACHES = {
 }
 
 CACHE_TTL = 60 * 15  # 15 minutes TTL = Time-To-Live
+
+# Optional: This is to ensure Django sessions are stored in Redis
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+# Celery Async
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = "redis://redis:6379/1"
 
 # Logging 
 
