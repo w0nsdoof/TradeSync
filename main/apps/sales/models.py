@@ -36,22 +36,29 @@ class SalesOrder(models.Model):
             invoice.generate_invoice_pdf()
     
     def __str__(self):
-        return f"Sales Order {self.id} - {self.customer}"
+        return f"Sales Order {self.id} - {self.user}"
 
 class Invoice(models.Model):
     sales_order = models.OneToOneField(SalesOrder, on_delete=models.CASCADE, related_name="invoice")
     invoice_date = models.DateTimeField(auto_now_add=True)
-    pdf_file = models.FileField(upload_to="invoices/", blank=True, null=True)
 
-    def generate_invoice_pdf(self):
-        """Generates a PDF invoice for the sales order."""
-        context = {"invoice": self}
-        html_content = render_to_string("sales/invoice_template.html", context)  # Renders HTML template
-        pdf_file = pdfkit.from_string(html_content, False)  # Generate PDF as bytes
+    @property
+    def pdf_file(self):
+        """Generates a PDF invoice for the sales order and returns it as a file."""
+        try:
+            context = {"invoice": self}
+            html_content = render_to_string("invoice.html", context)  # Render HTML
 
-        # Save PDF file
-        filename = f"invoice_{self.sales_order.id}.pdf"
-        self.pdf_file.save(filename, ContentFile(pdf_file), save=True)
+            pdfkit_config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)  # Use path from settings
+            pdf_file = pdfkit.from_string(html_content, False, configuration=pdfkit_config)  # Generate PDF as bytes
+
+            # Create a ContentFile for the PDF
+            filename = f"invoice_{self.sales_order.id}.pdf"
+            pdf_content_file = ContentFile(pdf_file, name=filename)
+
+            return pdf_content_file
+        except Exception as e:
+            print(f"Error generating PDF: {e}") 
 
     def __str__(self):
         return f"Invoice for Order {self.sales_order.id}"

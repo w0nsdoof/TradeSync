@@ -31,13 +31,16 @@ class InvoiceViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         if IsAdmin().has_permission(self.request, self):
             return Invoice.objects.all()  
-        return Invoice.objects.filter(sales_order__customer=self.request.user)
+        return Invoice.objects.filter(sales_order__user=self.request.user)
     
     @action(detail=True, methods=["get"])
     def download(self, request, pk=None):
         """API endpoint to download the PDF invoice"""
         invoice = self.get_object()
-        return FileResponse(invoice.pdf_file.open(), as_attachment=True, filename=f"invoice_{invoice.sales_order.id}.pdf")
+        pdf_file = invoice.pdf_file
+        if pdf_file:
+            return FileResponse(pdf_file.open(), as_attachment=True, filename=f"invoice_{invoice.sales_order.id}.pdf")
+        return Response({"error": "Failed to generate PDF"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DiscountViewSet(viewsets.ModelViewSet):
     serializer_class = DiscountSerializer
