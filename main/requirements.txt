@@ -20,6 +20,8 @@ cssselect2==0.7.0
 Django==5.1.6
 django-celery-beat==2.7.0
 django-cors-headers==4.7.0
+django-debug-toolbar==5.0.1
+django-prometheus==2.3.1
 django-redis==5.4.0
 django-timezone-field==7.1
 djangorestframework==3.15.2
@@ -39,6 +41,7 @@ packaging==24.2
 pandas==2.2.3
 pdfkit==1.0.0
 pillow==11.1.0
+prometheus_client==0.21.1
 prompt_toolkit==3.0.50
 psycopg2-binary==2.9.10
 pycparser==2.22

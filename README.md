@@ -12,4 +12,5 @@ A web-based platform for financial asset trading, sales tracking, and analytics.
 - **Caching & Queue**: Redis
 - **API Docs**: DRF-Spectacular
 - **Deployment**: Docker + Nginx (Load Balancer)
+- **Monitoring**: Prometheus + Grafana
 - **Security**: JWT Authentication, Role-based Access Control
