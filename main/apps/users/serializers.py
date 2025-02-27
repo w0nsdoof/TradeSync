@@ -23,3 +23,15 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+    
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=100)
+
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(required=False, write_only=True)
+
+    def validate(self, data):
+        password = data.get('password')
+        if not password and password != "GENERATE_RANDOM":
+            raise serializers.ValidationError("Password is required or use 'GENERATE_RANDOM' to generate one.")
+        return data
