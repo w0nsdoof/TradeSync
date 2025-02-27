@@ -2,12 +2,14 @@
 
 ![Sales and Trading App](assets/images/tradesync.webp)
 
-A comprehensive web-based platform for facilitating financial asset trading, sales tracking, and business analytics.
+A web-based platform for financial asset trading, sales tracking, and analytics.
 
-## Features ✨
+## Tech Stack
 
-- Real-time trading functionality
-- Sales tracking and monitoring
-- Analytics dashboard with business insights
-- Secure user authentication
-- Responsive web design
+- **Backend**: Django (DRF)
+- **Database**: PostgreSQL
+- **Async Tasks**: Celery + Redis
+- **Caching & Queue**: Redis
+- **API Docs**: DRF-Spectacular
+- **Deployment**: Docker + Nginx (Load Balancer)
+- **Security**: JWT Authentication, Role-based Access Control
