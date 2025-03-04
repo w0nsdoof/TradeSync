@@ -2,6 +2,8 @@
 
 ![Sales and Trading App](assets/images/tradesync.webp)
 
+Link to video with functional - [mkv](https://kbtuedu-my.sharepoint.com/:v:/g/personal/a_zhumabayev_kbtu_kz/EaCxLMF8CgNDr8DFjmD0dXQBusKxAhN1pbBR4uYavTR9rg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=5Y5IFS)
+
 A web-based platform for financial asset trading, sales tracking, and analytics.
 
 ## Tech Stack
